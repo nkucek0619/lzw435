@@ -46,37 +46,30 @@ Iterator compress(const std::string &uncompressed, Iterator result) {
  
 // Decompress a list of output ks to a string.
 // "begin" and "end" must form a valid range of ints
-template <typename Iterator>
-std::string decompress(Iterator begin, Iterator end) {
-  // Build the dictionary.
-  int dictSize = 256;
-  std::map<int,std::string> dictionary;
-  for (int i = 0; i < 256; i++)
-    dictionary[i] = std::string(1, i);
- 
-  std::string w(1, *begin++);
-  std::string result = w;
-  std::cout << "\ndecompressed: " << result <<";";
-  std::string entry;
-  for ( ; begin != end; begin++) {
-    int k = *begin;
-    if (dictionary.count(k))
-      entry = dictionary[k];
-    else if (k == dictSize)
-      entry = w + w[0];
-    else
-      throw "Bad compressed k";
- 
-    result += entry;
+template <typename Iterator> std::string decompress(Iterator begin, Iterator end) {
+    // Build the dictionary.
+    int dictSize = 256;
+    std::map<int,std::string> dictionary;
+    for (int i = 0; i < 256; i++) dictionary[i] = std::string(1, i);
+    std::string w(1, *begin++);
+    std::cout << "\n\nTESTING DECOMPRESSION\n\n";
+    std::string result = w;
     std::cout << "\ndecompressed: " << result <<";";
- 
-    // Add w+entry[0] to the dictionary.
-    if (dictionary.size()<4096)
-      dictionary[dictSize++] = w + entry[0];
- 
-    w = entry;
-  }
-  return result;
+    std::string entry;
+    for ( ; begin != end; begin++) {
+        int k = *begin;
+        if (dictionary.count(k)) entry = dictionary[k];
+        else if (k == dictSize) entry = w + w[0];
+        else throw "Bad compressed k";
+
+        result += entry;
+        std::cout << "\ndecompressed: " << result <<";";
+
+        // Add w+entry[0] to the dictionary.
+        if (dictionary.size()<4096) dictionary[dictSize++] = w + entry[0];
+        w = entry;
+    }
+    return result;
 }
 
 //
@@ -200,34 +193,38 @@ void binaryIODemo(std::vector<int> compressed) {
 int main(int argc, char** argv) {
 
     std::string filename;
-    std::ifstream testCase0;
-    std::ofstream testCase0lzw;
+    std::ifstream testCase;
+    std::ofstream testCaselzw;
     std::vector<int> compressed;
     if(argc==3 && argv[1][0] == 'c') {
         std::cout << "TESTING C\n";
         filename = argv[2];
-        testCase0.open(filename);
+        testCase.open(filename);
         std::string newfilename = filename.substr(0, filename.find_last_of('.')) + ".lzw";
-        testCase0lzw.open(newfilename);
+        testCaselzw.open(newfilename);
         std::string filecontents;
-        if (testCase0){
+        if (testCase) {
           std::stringstream buffer;
-          buffer << testCase0.rdbuf();
-          testCase0.close();
+          buffer << testCase.rdbuf();
+          testCase.close();
           filecontents = buffer.str();
         }
         //std::cout << "File Size: " << filecontents.size() << "\n";
         compress(filecontents, std::back_inserter(compressed));
-        for(auto itr=compressed.begin(); itr !=compressed.end(); itr++) testCase0lzw << *itr;
+        for(auto itr=compressed.begin(); itr !=compressed.end(); itr++) testCaselzw << *itr;
         std::cout << "\ncompressed[0]: " << compressed[0] << "\n";
-        testCase0.close();
+        testCase.close();
+        testCaselzw.close();
     }
 
     if(argc==3 && argv[1][0] == 'e') {
+        filename = argv[2];
+        std::string newfilename = filename.substr(0, filename.find_last_of('.'));
+        testCaselzw.open(newfilename);
         std::cout << "TESTING E\n";
         std::string decompressed = decompress(compressed.begin(), compressed.end());
         std::cout << "\nfinal decompressed:" << decompressed << std::endl;
-        testCase0lzw.close();
+        testCaselzw.close();
     }
     /*std::vector<int> compressed;
     compress("AAAAAAABBBBBB", std::back_inserter(compressed));
