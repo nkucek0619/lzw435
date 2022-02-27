@@ -1,14 +1,15 @@
 #include <string>
 #include <map>
 #include <iostream>
+#include <sstream>
 #include <fstream>
 #include <iterator>
-#include <vector> 
+#include <vector>
 #include <sys/stat.h>
 
 /* This code is derived in parts from LZW@RosettaCode for UA CS435 
-*/ 
- 
+*/
+
 // Compress a string to a list of output symbols.
 // The result will be written to the output iterator
 // starting at "result"; the final iterator is returned.
@@ -196,17 +197,48 @@ void binaryIODemo(std::vector<int> compressed) {
  
 // demo of how LZW works
 
-int main() {
-  std::vector<int> compressed;
-  compress("AAAAAAABBBBBB", std::back_inserter(compressed));
-  for(auto itr=compressed.begin(); itr !=compressed.end(); itr++)
-        std::cout<<"\n"<<*itr;
-          
-  std::string decompressed = decompress(compressed.begin(), compressed.end());
-  std::cout << "\nfinal decompressed:" << decompressed << std::endl;
-  
-  //demo as the name suggests
-  binaryIODemo(compressed);
-  
-  return 0;
+int main(int argc, char** argv) {
+
+    std::string filename;
+    std::ifstream testCase0;
+    std::ofstream testCase0lzw;
+    std::vector<int> compressed;
+    if(argc==3 && argv[1][0] == 'c') {
+        std::cout << "TESTING C\n";
+        filename = argv[2];
+        testCase0.open(filename);
+        std::string newfilename = filename.substr(0, filename.find_last_of('.')) + ".lzw";
+        testCase0lzw.open(newfilename);
+        std::string filecontents;
+        if (testCase0){
+          std::stringstream buffer;
+          buffer << testCase0.rdbuf();
+          testCase0.close();
+          filecontents = buffer.str();
+        }
+        //std::cout << "File Size: " << filecontents.size() << "\n";
+        compress(filecontents, std::back_inserter(compressed));
+        for(auto itr=compressed.begin(); itr !=compressed.end(); itr++) testCase0lzw << *itr;
+        std::cout << "\ncompressed[0]: " << compressed[0] << "\n";
+        testCase0.close();
+    }
+
+    if(argc==3 && argv[1][0] == 'e') {
+        std::cout << "TESTING E\n";
+        std::string decompressed = decompress(compressed.begin(), compressed.end());
+        std::cout << "\nfinal decompressed:" << decompressed << std::endl;
+        testCase0lzw.close();
+    }
+    /*std::vector<int> compressed;
+    compress("AAAAAAABBBBBB", std::back_inserter(compressed));
+    for(auto itr=compressed.begin(); itr !=compressed.end(); itr++)
+          std::cout<<"\n"<<*itr;
+
+    std::string decompressed = decompress(compressed.begin(), compressed.end());
+    std::cout << "\nfinal decompressed:" << decompressed << std::endl;*/
+
+    //demo as the name suggests
+    binaryIODemo(compressed);
+
+    return 0;
 }
