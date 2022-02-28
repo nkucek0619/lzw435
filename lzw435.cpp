@@ -52,9 +52,9 @@ template <typename Iterator> std::string decompress(Iterator begin, Iterator end
     std::map<int,std::string> dictionary;
     for (int i = 0; i < 256; i++) dictionary[i] = std::string(1, i);
     std::string w(1, *begin++);
-    std::cout << "\n\nTESTING DECOMPRESSION\n\n";
+    //std::cout << "\n\nTESTING DECOMPRESSION\n\n";
     std::string result = w;
-    std::cout << "\ndecompressed: " << result <<";";
+    std::cout << "\ndecompressed: " << result;
     std::string entry;
     for ( ; begin != end; begin++) {
         int k = *begin;
@@ -63,7 +63,7 @@ template <typename Iterator> std::string decompress(Iterator begin, Iterator end
         else throw "Bad compressed k";
 
         result += entry;
-        std::cout << "\ndecompressed: " << result <<";";
+        std::cout << "\ndecompressed: " << result;
 
         // Add w+entry[0] to the dictionary.
         if (dictionary.size()<4096) dictionary[dictSize++] = w + entry[0];
@@ -192,50 +192,65 @@ void binaryIODemo(std::vector<int> compressed) {
 
 int main(int argc, char** argv) {
 
-    std::string filename;
-    std::ifstream testCase;
-    std::ofstream testCaselzw;
-    std::vector<int> compressed;
-    if(argc==3 && argv[1][0] == 'c') {
-        std::cout << "TESTING C\n";
-        filename = argv[2];
-        testCase.open(filename);
-        std::string newfilename = filename.substr(0, filename.find_last_of('.')) + ".lzw";
-        testCaselzw.open(newfilename);
-        std::string filecontents;
-        if (testCase) {
-          std::stringstream buffer;
-          buffer << testCase.rdbuf();
-          testCase.close();
-          filecontents = buffer.str();
+    try {
+
+        std::string filename, binarybits, filecontents;
+        std::ifstream testCase, testCaseDecompress;
+        std::ofstream testCaselzw, testCaseOutput;
+        std::stringstream buffer;
+        std::vector<int> compressed, todecompress;
+        if(argc==3 && argv[1][0] == 'c') {
+            filename = argv[2];
+            testCase.open(filename);
+            std::string newfilename = filename.substr(0, filename.find_last_of('.')) + ".lzw";
+            testCaselzw.open(newfilename);
+            std::string filecontents;
+            if (testCase) {
+              buffer << testCase.rdbuf();
+              testCase.close();
+              filecontents = buffer.str();
+            }
+            compress(filecontents, std::back_inserter(compressed));
+            for(auto itr=compressed.begin(); itr !=compressed.end(); itr++) {
+                binarybits = int2BinaryString(*itr, 12);
+                testCaselzw << binarybits;
+            }
+            testCaselzw.close();
         }
-        //std::cout << "File Size: " << filecontents.size() << "\n";
-        compress(filecontents, std::back_inserter(compressed));
-        for(auto itr=compressed.begin(); itr !=compressed.end(); itr++) testCaselzw << *itr;
-        std::cout << "\ncompressed[0]: " << compressed[0] << "\n";
-        testCase.close();
-        testCaselzw.close();
-    }
 
-    if(argc==3 && argv[1][0] == 'e') {
-        filename = argv[2];
-        std::string newfilename = filename.substr(0, filename.find_last_of('.'));
-        testCaselzw.open(newfilename);
-        std::cout << "TESTING E\n";
+        if(argc==3 && argv[1][0] == 'e') {
+            filename = argv[2];
+            std::string newfilename = filename.substr(0, filename.find_last_of('.'));
+            testCase.open(filename);
+            testCaseOutput.open(newfilename);
+            if(testCase) {
+                buffer << testCase.rdbuf();
+                filecontents = buffer.str();
+                testCase.close();
+            }
+            for(int i = 0; i < filecontents.size(); i+=12) {
+                binarybits = filecontents.substr(i, i+12);
+                compressed.push_back(binaryString2Int(binarybits));
+            }
+            std::cout << "\nTESTING\n";
+            std::string decompressed = decompress(compressed.begin(), compressed.end());
+            std::cout << "\nfinal decompressed: " << decompressed << std::endl;
+            testCaseOutput << decompressed;
+            testCaseOutput.close();
+        }
+        /*compress("AAAAAAABBBBBB", std::back_inserter(compressed));
+        for(auto itr=compressed.begin(); itr !=compressed.end(); itr++)
+              std::cout<<"\n"<<*itr;
+
         std::string decompressed = decompress(compressed.begin(), compressed.end());
-        std::cout << "\nfinal decompressed:" << decompressed << std::endl;
-        testCaselzw.close();
+        std::cout << "\nfinal decompressed:" << decompressed << std::endl;*/
+
+        //demo as the name suggests
+        binaryIODemo(compressed);
+    } catch (char const* err) {
+        std::cout << "The library threw an exception:\n"
+            << err << std::endl;
     }
-    /*std::vector<int> compressed;
-    compress("AAAAAAABBBBBB", std::back_inserter(compressed));
-    for(auto itr=compressed.begin(); itr !=compressed.end(); itr++)
-          std::cout<<"\n"<<*itr;
-
-    std::string decompressed = decompress(compressed.begin(), compressed.end());
-    std::cout << "\nfinal decompressed:" << decompressed << std::endl;*/
-
-    //demo as the name suggests
-    binaryIODemo(compressed);
 
     return 0;
 }
