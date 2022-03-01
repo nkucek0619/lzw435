@@ -1,7 +1,7 @@
 /*
     Author: Nicholas Kucek
-    3460:435 Algorithms - Project 2: LZW\
-    lzw435.cpp - main file
+    3460:435 Algorithms - Project 2: LZW
+    lzw435M.cpp - main file but allows variable length encodings
 
     This code is derived in parts from LZW@RosettaCode for UA CS435.
 
