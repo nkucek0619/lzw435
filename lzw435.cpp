@@ -238,7 +238,7 @@ int main(int argc, char** argv) {
             filename = argv[2];
             std::string newfilename = filename.substr(0, filename.find_last_of('.'));
             testCase.open(filename);
-            testCaseOutput.open(newfilename);
+            testCaseOutput.open(newfilename+"_2");
 
             if(testCase) {
 
