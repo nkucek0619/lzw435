@@ -1,7 +1,7 @@
 /*
     Author: Nicholas Kucek
-    3460:435 Algorithms - Project 2: LZW
-    lzw435M.cpp - main file but allows variable length encodings
+    3460:435 Algorithms - Project 2: LZW - Part 2
+    lzw435M.cpp - alternate version of main file that allows variable length encodings
 
     This code is derived in parts from LZW@RosettaCode for UA CS435.
 
@@ -211,7 +211,7 @@ int main(int argc, char** argv) {
 
             filename = argv[2];
             testCase.open(filename);
-            std::string newfilename = filename.substr(0, filename.find_last_of('.')) + ".lzw";
+            std::string newfilename = filename.substr(0, filename.find_last_of('.')) + ".lzw2";
             testCaselzw.open(newfilename);
             std::string filecontents;
 
@@ -238,7 +238,7 @@ int main(int argc, char** argv) {
             filename = argv[2];
             std::string newfilename = filename.substr(0, filename.find_last_of('.'));
             testCase.open(filename);
-            testCaseOutput.open(newfilename+"_2");
+            testCaseOutput.open(newfilename+"_2M");
 
             if(testCase) {
 

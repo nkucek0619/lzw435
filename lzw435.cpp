@@ -1,6 +1,6 @@
 /*
     Author: Nicholas Kucek
-    3460:435 Algorithms - Project 2: LZW\
+    3460:435 Algorithms - Project 2: LZW - Part 1
     lzw435.cpp - main file
 
     This code is derived in parts from LZW@RosettaCode for UA CS435.

@@ -14,8 +14,8 @@
 * lzw435.cpp:
 ```g++ -o lzw435 lzw435.cpp``` to build
   * Compression: <pre><code>./lzw435 c [filename]</pre></code> - this will create a compressed .lzw version of the file.
-  * Decompression: <pre><code>./lzw435 e [filename.lzw]</pre></code> - this will decompress the .lzw version of the file as a second version without any added file extension (i.e. as testCase2, not testCase.txt).
+  * Decompression: <pre><code>./lzw435 e [filename.lzw]</pre></code> - this will decompress the .lzw version of the file as a second version without any added file extension (i.e. as testCase0_2, not testCase0.txt).
 * lzw435M.cpp:
 ```g++ -o lzw435M lzw435M.cpp``` to build
   * Compression: <pre><code>./lzw435M c [filename]</pre></code> - this will create a compressed .lzw2 version of the file with variable bit lengths depending on the bit length specified.
-  * Decompression: <pre><code>./lzw435M e [filename.lzw2]</pre></code> - this will decompress the .lzw2 version as a second version of the file without any added file extension (i.e. as testCase2M, not testCase.txt).
+  * Decompression: <pre><code>./lzw435M e [filename.lzw2]</pre></code> - this will decompress the .lzw2 version as a second version of the file without any added file extension (i.e. as testCase0_2M, not testCase0.txt).
