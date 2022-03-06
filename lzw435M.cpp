@@ -20,6 +20,10 @@
 #include <vector>
 #include <sys/stat.h>
 
+// disable warning for changeCodeLength (no return statement at the end of the function)
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wreturn-type"
+
 template <typename Iterator> Iterator compress(const std::string &uncompressed, Iterator result) {
 
     // Build the dictionary, start with 256.
@@ -196,7 +200,7 @@ void binaryIODemo(std::vector<int> compressed) {
     std::cout << " saved string : " << s << "\n";
 }
 
-std::vector<int> get_code_and_length(std::vector<int> v) {
+std::tuple<int,int> changeCodeLength(std::vector<int> v) {
     // Return binary string of values in vector
     if (v.empty())
         throw "ERROR: Cannot compute an empty vector.";
@@ -205,19 +209,7 @@ std::vector<int> get_code_and_length(std::vector<int> v) {
         int bits;
         auto f = v.front();
 
-    if (f < 2^8) {
-
-        bits = 8;
-        v.erase(v.begin());
-        return {f, bits};
-
-    } else if (f < 2^9) {
-
-        bits = 9;
-        v.erase(v.begin());
-        return {f, bits};
-
-    } else if (f < 2^10) {
+    if (f < 2^10) {
 
         bits = 10;
         v.erase(v.begin());
@@ -255,14 +247,10 @@ std::vector<int> get_code_and_length(std::vector<int> v) {
 
     } else if (f < 2^16) {
 
-        bits = 16;
-        v.erase(v.begin());
-        return {f, bits};
+        std::cout << "\nCode words will remain original length for this file.\n";
 
     } else throw "ERROR: Cannot create a bit length longer than 16 bits.";
   }
-
-  return v;
 }
 
 // demo of how LZW works
@@ -270,11 +258,12 @@ int main(int argc, char** argv) {
 
     try {
 
-        std::string filename, binarybits, filecontents, decompressed;
-        std::ifstream testCase, testCaseDecompress;
+        std::string filename, binarybits, filecontents, filecontentslzw2, decompressed;
+        int wordlength;
+        std::ifstream testCase, testCaselzw2;
         std::ofstream testCaselzw, testCaseOutput;
-        std::stringstream buffer;
-        std::vector<int> compressed;
+        std::stringstream buffer, bufferlzw2;
+        std::vector<int> compressed, compressedlzw2;
 
         // file compression
         if(argc == 3 && argv[1][0] == 'c') {
@@ -295,8 +284,11 @@ int main(int argc, char** argv) {
             }
 
             compress(filecontents, std::back_inserter(compressed));
+            std::tuple<int,int> newCodeWordLength = changeCodeLength(compressed);
+            wordlength = std::get<1>(newCodeWordLength);
+            std::cout << "\nFile will now have " << std::get<1>(newCodeWordLength) << " bits/word.\n";
             for (auto itr = compressed.begin(); itr != compressed.end(); itr++) {
-                binarybits = int2BinaryString(*itr, 12);
+                binarybits = int2BinaryString(*itr, wordlength);
                 testCaselzw << binarybits;
             }
 
@@ -321,10 +313,24 @@ int main(int argc, char** argv) {
                 testCase.close();
             }
 
-            const char* array = filecontents.c_str();
-            for(int i = 0; i < filecontents.length(); i+=12) {
+            std::string newfilename2 = filename.substr(0, filename.find_last_of('.')) + ".txt";
+            testCaselzw2.open(newfilename2);
+            if(testCaselzw2.fail()) throw "Error: file could not opened or does not exist";
 
-                for(int j = 0; j < 12; j++) {
+            if(testCaselzw2) {
+
+                bufferlzw2 << testCaselzw2.rdbuf();
+                filecontentslzw2 = bufferlzw2.str();
+                testCaselzw2.close();
+            }
+
+            compress(filecontentslzw2, std::back_inserter(compressedlzw2));
+            std::tuple<int,int> newCodeWordLength = changeCodeLength(compressedlzw2);
+            wordlength = std::get<1>(newCodeWordLength);
+            const char* array = filecontents.c_str();
+            for(int i = 0; i < filecontents.length(); i+=wordlength) {
+
+                for(int j = 0; j < wordlength; j++) {
                     binarybits += array[i+j];
                 }
 
@@ -340,6 +346,7 @@ int main(int argc, char** argv) {
 
         //demo as the name suggests
         binaryIODemo(compressed);
+
     } catch (char const* err) {
         std::cout << "\nThe library threw an exception:\n"
             << err << std::endl;
@@ -347,3 +354,4 @@ int main(int argc, char** argv) {
 
     return 0;
 }
+#pragma GCC diagnostic pop
