@@ -4,6 +4,7 @@
     lzw435.cpp - main file
 
     This code is derived in parts from LZW@RosettaCode for UA CS435.
+    Link: https://rosettacode.org/wiki/LZW_compression#C.2B.2B
 
     Compress a string to a list of output symbols.
     The result will be written to the output iterator
@@ -58,7 +59,7 @@ template <typename Iterator> std::string decompress(Iterator begin, Iterator end
         dictionary[i] = std::string(1, i);
     std::string w(1, *begin++);
     std::string result = w;
-    std::cout << "\ndecompressed: " << result;
+    std::cout << "decompressed: " << result;
     std::string entry;
     for ( ; begin != end; begin++) {
 
@@ -78,7 +79,7 @@ template <typename Iterator> std::string decompress(Iterator begin, Iterator end
     return result;
 }
 
-//
+// convert an integer into a string of bits
 std::string int2BinaryString(int c, int cl) {
 
     std::string p = ""; // a binary code string with code length = cl
@@ -103,7 +104,7 @@ std::string int2BinaryString(int c, int cl) {
     return p;
 }
 
-//
+// convert a string of bits into an integer
 int binaryString2Int(std::string p) {
 
     int code = 0;
@@ -200,19 +201,21 @@ int main(int argc, char** argv) {
 
     try {
 
-        std::string filename, binarybits, bit, filecontents;
-        std::ifstream testCase, testCaseDecompress;
+        std::string filename, binarybits, filecontents, decompressed;
+        std::ifstream testCase;
         std::ofstream testCaselzw, testCaseOutput;
         std::stringstream buffer;
-        std::vector<int> compressed, todecompress;
+        std::vector<int> compressed;
 
         // file compression
         if(argc == 3 && argv[1][0] == 'c') {
 
             filename = argv[2];
             testCase.open(filename);
+            if(testCase.fail()) throw "Error: file could not opened or does not exist";
             std::string newfilename = filename.substr(0, filename.find_last_of('.')) + ".lzw";
             testCaselzw.open(newfilename);
+            if(testCaselzw.fail()) throw "Error: file could not opened or does not exist";
             std::string filecontents;
 
             if (testCase) {
@@ -238,7 +241,9 @@ int main(int argc, char** argv) {
             filename = argv[2];
             std::string newfilename = filename.substr(0, filename.find_last_of('.'));
             testCase.open(filename);
+            if(testCase.fail()) throw "Error: file could not opened or does not exist";
             testCaseOutput.open(newfilename+"_2");
+            if(testCaseOutput.fail()) throw "Error: file could not opened or does not exist";
 
             if(testCase) {
 
@@ -259,7 +264,7 @@ int main(int argc, char** argv) {
                 binarybits.clear();
             }
 
-            std::string decompressed = decompress(compressed.begin(), compressed.end());
+            decompressed = decompress(compressed.begin(), compressed.end());
             std::cout << "\nfinal decompressed: " << decompressed << std::endl;
             testCaseOutput << decompressed;
             testCaseOutput.close();

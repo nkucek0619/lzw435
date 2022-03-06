@@ -4,6 +4,7 @@
     lzw435M.cpp - alternate version of main file that allows variable length encodings
 
     This code is derived in parts from LZW@RosettaCode for UA CS435.
+    Link: https://rosettacode.org/wiki/LZW_compression#C.2B.2B
 
     Compress a string to a list of output symbols.
     The result will be written to the output iterator
@@ -78,7 +79,7 @@ template <typename Iterator> std::string decompress(Iterator begin, Iterator end
     return result;
 }
 
-//
+// convert an integer into a string of bits
 std::string int2BinaryString(int c, int cl) {
 
     std::string p = ""; // a binary code string with code length = cl
@@ -103,7 +104,7 @@ std::string int2BinaryString(int c, int cl) {
     return p;
 }
 
-//
+// convert a string of bits into an integer
 int binaryString2Int(std::string p) {
 
     int code = 0;
@@ -195,24 +196,95 @@ void binaryIODemo(std::vector<int> compressed) {
     std::cout << " saved string : " << s << "\n";
 }
 
+std::vector<int> get_code_and_length(std::vector<int> v) {
+    // Return binary string of values in vector
+    if (v.empty())
+        throw "ERROR: Cannot compute an empty vector.";
+
+    while (!v.empty()) {
+        int bits;
+        auto f = v.front();
+
+    if (f < 2^8) {
+
+        bits = 8;
+        v.erase(v.begin());
+        return {f, bits};
+
+    } else if (f < 2^9) {
+
+        bits = 9;
+        v.erase(v.begin());
+        return {f, bits};
+
+    } else if (f < 2^10) {
+
+        bits = 10;
+        v.erase(v.begin());
+        return {f, bits};
+
+    } else if (f < 2^11) {
+
+        bits = 11;
+        v.erase(v.begin());
+        return {f, bits};
+
+    } else if (f < 2^12) {
+
+        bits = 12;
+        v.erase(v.begin());
+        return {f, bits};
+
+    } else if (f < 2^13) {
+
+        bits = 13;
+        v.erase(v.begin());
+        return {f, bits};
+
+    } else if (f < 2^14) {
+
+        bits = 14;
+        v.erase(v.begin());
+        return {f, bits};
+
+    } else if (f < 2^15) {
+
+        bits = 15;
+        v.erase(v.begin());
+        return {f, bits};
+
+    } else if (f < 2^16) {
+
+        bits = 16;
+        v.erase(v.begin());
+        return {f, bits};
+
+    } else throw "ERROR: Cannot create a bit length longer than 16 bits.";
+  }
+
+  return v;
+}
+
 // demo of how LZW works
 int main(int argc, char** argv) {
 
     try {
 
-        std::string filename, binarybits, bit, filecontents;
+        std::string filename, binarybits, filecontents, decompressed;
         std::ifstream testCase, testCaseDecompress;
         std::ofstream testCaselzw, testCaseOutput;
         std::stringstream buffer;
-        std::vector<int> compressed, todecompress;
+        std::vector<int> compressed;
 
         // file compression
         if(argc == 3 && argv[1][0] == 'c') {
 
             filename = argv[2];
             testCase.open(filename);
+            if(testCase.fail()) throw "Error: file could not opened or does not exist";
             std::string newfilename = filename.substr(0, filename.find_last_of('.')) + ".lzw2";
             testCaselzw.open(newfilename);
+            if(testCaselzw.fail()) throw "Error: file could not opened or does not exist";
             std::string filecontents;
 
             if (testCase) {
@@ -224,7 +296,6 @@ int main(int argc, char** argv) {
 
             compress(filecontents, std::back_inserter(compressed));
             for (auto itr = compressed.begin(); itr != compressed.end(); itr++) {
-
                 binarybits = int2BinaryString(*itr, 12);
                 testCaselzw << binarybits;
             }
@@ -238,7 +309,10 @@ int main(int argc, char** argv) {
             filename = argv[2];
             std::string newfilename = filename.substr(0, filename.find_last_of('.'));
             testCase.open(filename);
-            testCaseOutput.open(newfilename+"_2M");
+            if(testCase.fail()) throw "Error: file could not opened or does not exist";
+            newfilename.append("_2M");
+            testCaseOutput.open(newfilename);
+            if(testCaseOutput.fail()) throw "Error: file could not opened or does not exist";
 
             if(testCase) {
 
@@ -251,7 +325,6 @@ int main(int argc, char** argv) {
             for(int i = 0; i < filecontents.length(); i+=12) {
 
                 for(int j = 0; j < 12; j++) {
-
                     binarybits += array[i+j];
                 }
 
@@ -259,7 +332,7 @@ int main(int argc, char** argv) {
                 binarybits.clear();
             }
 
-            std::string decompressed = decompress(compressed.begin(), compressed.end());
+            decompressed = decompress(compressed.begin(), compressed.end());
             std::cout << "\nfinal decompressed: " << decompressed << std::endl;
             testCaseOutput << decompressed;
             testCaseOutput.close();
