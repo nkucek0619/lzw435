@@ -59,6 +59,7 @@ template <typename Iterator> std::string decompress(Iterator begin, Iterator end
         dictionary[i] = std::string(1, i);
     std::string w(1, *begin++);
     std::string result = w;
+    // comment out this line of code to decompress larger files (i.e. bible2.txt) within seconds
     std::cout << "decompressed: " << result;
     std::string entry;
     for ( ; begin != end; begin++) {
@@ -69,6 +70,7 @@ template <typename Iterator> std::string decompress(Iterator begin, Iterator end
         else throw "Bad compressed k";
 
         result += entry;
+        // comment out this line of code as well to decompress larger files (i.e. bible2.txt) within seconds
         std::cout << "\ndecompressed: " << result;
 
         // Add w+entry[0] to the dictionary.
@@ -279,10 +281,6 @@ int main(int argc, char** argv) {
             testCaseOutput << decompressed;
             testCaseOutput.close();
         }
-
-        int testCaseOutputFileSize = get_file_size(filename);
-        if(filename.substr(0, filename.find_last_of('.')) + ".lzw" == filename) testCaseOutputFileSize/=8;
-        std::cout << filename << " file size: " << testCaseOutputFileSize << " bytes\n";
 
         //demo as the name suggests
         binaryIODemo(compressed);

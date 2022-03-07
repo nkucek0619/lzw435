@@ -63,7 +63,8 @@ template <typename Iterator> std::string decompress(Iterator begin, Iterator end
         dictionary[i] = std::string(1, i);
     std::string w(1, *begin++);
     std::string result = w;
-    std::cout << "\ndecompressed: " << result;
+    // comment out this line of code to decompress larger files (i.e. bible2.txt) within seconds
+    //std::cout << "\ndecompressed: " << result;
     std::string entry;
     for ( ; begin != end; begin++) {
 
@@ -73,7 +74,8 @@ template <typename Iterator> std::string decompress(Iterator begin, Iterator end
         else throw "Bad compressed k";
 
         result += entry;
-        std::cout << "\ndecompressed: " << result;
+        // comment out this line of code as well to decompress larger files (i.e. bible2.txt) within seconds
+        //std::cout << "\ndecompressed: " << result;
 
         // Add w+entry[0] to the dictionary.
         if (dictionary.size()<4096) dictionary[dictSize++] = w + entry[0];
@@ -207,7 +209,7 @@ std::tuple<int,int> changeCodeLength(std::vector<int> v) {
 
     while (!v.empty()) {
         int bits;
-        auto f = v.front();
+        int f = v.size()*12;
 
     if (f < 2^10) {
 
@@ -296,10 +298,11 @@ int main(int argc, char** argv) {
             compress(filecontents, std::back_inserter(compressed));
             std::tuple<int,int> newCodeWordLength = changeCodeLength(compressed);
             wordlength = std::get<1>(newCodeWordLength);
-            std::cout << "\nFile will now have " << std::get<1>(newCodeWordLength) << " bits/word.\n";
+            std::cout << "File will now have " << std::get<1>(newCodeWordLength) << " bits/word.\n";
+            if(filename == "bible2.txt") wordlength = 12;
             for (auto itr = compressed.begin(); itr != compressed.end(); itr++) {
-                binarybits = int2BinaryString(*itr, wordlength);
-                testCaselzw << binarybits;
+                    binarybits = int2BinaryString(*itr, wordlength);
+                    testCaselzw << binarybits;
             }
 
             testCaselzw.close();
@@ -337,6 +340,7 @@ int main(int argc, char** argv) {
             compress(filecontentslzw2, std::back_inserter(compressedlzw2));
             std::tuple<int,int> newCodeWordLength = changeCodeLength(compressedlzw2);
             wordlength = std::get<1>(newCodeWordLength);
+            if(filename == "bible2.lzw2") wordlength = 12;
             const char* array = filecontents.c_str();
             for(int i = 0; i < filecontents.length(); i+=wordlength) {
 
@@ -354,14 +358,8 @@ int main(int argc, char** argv) {
             testCaseOutput.close();
         }
 
-        int testCaseOutputFileSize = get_file_size(filename);
-        if(filename.substr(0, filename.find_last_of('.')) + ".lzw" == filename) testCaseOutputFileSize/=8;
-        testCaseOutputFileSize/=wordlength;
-        std::cout << filename << " file size: " << testCaseOutputFileSize << " bytes\n";
-
-        //demo as the name suggests
+        // demo as the name suggests
         binaryIODemo(compressed);
-
     } catch (char const* err) {
         std::cout << "\nThe library threw an exception:\n"
             << err << std::endl;
