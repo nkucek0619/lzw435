@@ -196,6 +196,16 @@ void binaryIODemo(std::vector<int> compressed) {
     std::cout << " saved string : " << s << "\n";
 }
 
+// returns the size of a file (used for self-assessment)
+int get_file_size(std::string filename) { // path to file
+    FILE *p_file = NULL;
+    p_file = fopen(filename.c_str(),"rb");
+    fseek(p_file,0,SEEK_END);
+    int size = ftell(p_file);
+    fclose(p_file);
+    return size;
+}
+
 // demo of how LZW works
 int main(int argc, char** argv) {
 
@@ -269,6 +279,10 @@ int main(int argc, char** argv) {
             testCaseOutput << decompressed;
             testCaseOutput.close();
         }
+
+        int testCaseOutputFileSize = get_file_size(filename);
+        if(filename.substr(0, filename.find_last_of('.')) + ".lzw" == filename) testCaseOutputFileSize/=8;
+        std::cout << filename << " file size: " << testCaseOutputFileSize << " bytes\n";
 
         //demo as the name suggests
         binaryIODemo(compressed);
